@@ -15,7 +15,8 @@ class Application(Frame):
 		self.parameter = parameter
 
 		self.setupUI()
-		
+
+		self.sendingThreadActive = False		
 
 
 	def setupUI(self):
@@ -29,18 +30,28 @@ class Application(Frame):
 		
 
 		#self.canvas.create_rectangle(150, 10, 240, 80, outline="#f50", fill="#f50")
+
+		# Stick Containers
 		self.leftStick = self.canvas.create_oval(130, 100, 330, 300, outline='gray80', fill='gray90', tags=('leftStick'))
 		self.rightStick = self.canvas.create_oval(470, 100, 670, 300, outline='gray80', fill='gray90', tags=('rightStick'))
+	
+		# Left Knob
 		self.leftKnob = self.canvas.create_oval(215, 185, 245, 215, outline='gray60', fill='gray70', tags=('leftKnob'))
-		self.rightKnob = self.canvas.create_oval(555, 185, 585, 215, outline='gray60', fill='gray70', tags=('rightKnob'))
-		self.leftStickText = self.canvas.create_text(230, 330, text="Thrust / Rudder", fill="gray50")
-		self.rightStickText = self.canvas.create_text(570, 330, text="Elevator / Aileron", fill="gray50")
-		#self.rightStick = self.canvas.create_oval(0, 20, 20, 40, outline='gray40', fill='gray60', tags=('ball3'))
-		#self.ball.pack(side = TOP)
-		self.canvas.pack(side = TOP, anchor = NW, padx = 10, pady = 10)
-		# Start-button
+		self.originalLeftKnobCoordinates = self.canvas.coords(self.leftKnob)
 
-		self.startButton = Button(self, text = "Start", command = self.start, anchor = W)
+		# Right Knob
+		self.rightKnob = self.canvas.create_oval(555, 185, 585, 215, outline='gray60', fill='gray70', tags=('rightKnob'))
+		self.originalRightKnobCoordinates = self.canvas.coords(self.rightKnob)
+
+		#Text
+		self.leftStickText = self.canvas.create_text(230, 330, text="Thrust / Rudder", fill="gray50")
+		self.rightStickText = self.canvas.create_text(572, 330, text="Elevator / Aileron", fill="gray50")
+		#self.rightStick = self.canvas.create_oval(0, 20, 20, 40, outline='gray40', fill='gray60', tags=('ball3'))
+		#self.ball.pack(side = TOP) 
+		self.canvas.pack(side = TOP, anchor = NW, padx = 10, pady = 10)
+
+		# Start-button
+		self.startButton = Button(self, text = "Start", command = self.startSending, anchor = W)
 		self.startButton.configure(width = 10, activebackground = "#33B5E5", relief = FLAT)
 		self.startButton_window = self.canvas.create_window(10, 10, anchor=NW, window=self.startButton)
 
@@ -70,8 +81,8 @@ class Application(Frame):
 								self.text.insert(0.0, 'tjoho')'''
 
 		# Start-button
-		self.quitButton = Button (self, text = 'Start', command = self.start)
-		self.quitButton.grid(row = 4, column = 1, sticky = W)
+		#self.quitButton = Button (self, text = 'Start', command = self.startSending)
+		#self.quitButton.grid(row = 4, column = 1, sticky = W)
 
 
 
@@ -90,27 +101,50 @@ class Application(Frame):
 
 
 
-	def start(self):
+	def startSending(self):
+
 		#self.comLink.connect() 		# Connects to Arduino
+
+		self.sendingThreadActive = True
+		self.startButton.configure(text="Stop", command=self.stopSending)
+
+		thread.start_new_thread(self.sendDataThread, (0.05,))		# Start thread
+		thread.start_new_thread(self.updateUIPins, (0.05,))
+
+
+
+	def stopSending(self):
+
+		self.sendingThreadActive = False
+		self.startButton.configure(text="Start", command=self.startSending)
+
+
+
+
+	def	sendDataThread(self, delay):
+
+		print "Started Sending"
 
 		while True:
 			
 			self.updateChannelValues()
 			self.sendData()
-			time.sleep(0.05)
+			time.sleep(delay)
 
-			'''try:
-													sys.stdin.readline()
-												except KeyboardInterrupt:
-													pass
-												finally:
-													break'''
+			if self.sendingThreadActive is not True:
+				break
+
+		print "Stopped Sending"
+
+
 
 
 	def updateChannelValues(self):
 
+		# Get values from controller (not the raw data but the calculated data)
 		controllerData = self.controller.updateControllerData()
 
+		# Put them in the array
 		for x in xrange(0, self.parameter['nrChannels']):
 			self.parameter['channelData'][x] = controllerData[x]
 			
@@ -121,20 +155,68 @@ class Application(Frame):
 		finalString = ""
 
 		for x in xrange(0, self.parameter['nrChannels']):
-			finalString = finalString + str(self.valueHandler.getOutput(self.parameter['channelData'][x])) 		# Value
-			finalString = finalString + ("," if self.parameter['nrChannels'] - 1 != x else "") 					# Adding comma 
 
+			# Calculaate the output using Value Handler
+			output = self.parameter['channelOutput'][x] = self.valueHandler.getOutput(self.parameter['channelData'][x], x)
+			
+			# Finalize the string
+			finalString = finalString + str(output) + ("," if self.parameter['nrChannels'] - 1 != x else "") 		# Value 
 
+		# Send the data
 		print finalString
 		#self.comLink.send(finalString)
+
+
+
+	
+
+
+	def updateUIPins(self, delay):
+
+		originalLeftStickCoordinates = self.canvas.coords(self.leftStick)
+		originalRightStickCoordinates = self.canvas.coords(self.rightStick)
+
+		while True:
+
+			# Get new values for left knob
+			newLeftPosX = self.calPinsOffset(self.parameter['maxOutput'] - self.parameter['channelOutput'][3], self.parameter['maxOutput'], self.parameter['minOutput'], originalLeftStickCoordinates[0], originalLeftStickCoordinates[2]-30)
+			newLeftPosY = self.calPinsOffset(self.parameter['channelOutput'][2], self.parameter['maxOutput'], self.parameter['minOutput'], originalLeftStickCoordinates[1], originalLeftStickCoordinates[3]-30)
+
+			# Get new values for right knob
+			newRightPosX = self.calPinsOffset(self.parameter['maxOutput'] - self.parameter['channelOutput'][0], self.parameter['maxOutput'], self.parameter['minOutput'], originalRightStickCoordinates[0], originalRightStickCoordinates[2]-30)
+			newRightPosY = self.calPinsOffset(self.parameter['maxOutput'] - self.parameter['channelOutput'][1], self.parameter['maxOutput'], self.parameter['minOutput'], originalRightStickCoordinates[1], originalRightStickCoordinates[3]-30)
+
+			# Apply changes and move accoridngly
+			self.canvas.coords(self.leftKnob, (newLeftPosX, newLeftPosY, newLeftPosX + 30, newLeftPosY + 30))
+			self.canvas.coords(self.rightKnob, (newRightPosX, newRightPosY, newRightPosX + 30, newRightPosY + 30))
+
+			time.sleep(delay)
+
+			# Thread 'breaker'
+			if self.sendingThreadActive is not True:
+				break
+
+
+
+	def calPinsOffset(self, value, maxInput, minInput, maxOutput, minOutput):
+
+		value = maxInput if value > maxInput else value
+		value = minInput if value < minInput else value
+
+		inputSpan = maxInput - minInput
+		outputSpan = maxOutput - minOutput
+
+		scaledValue = float(value - minInput) / float(inputSpan)
+
+		return minOutput + (scaledValue * outputSpan)
 
 
 
 
 	def quitApp(self):
 
-		self.destroy()  #destroys root window
-		self.quit()     #quits mainloop
+		self.destroy()  
+		self.quit()  
 
 
 

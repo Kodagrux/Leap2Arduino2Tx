@@ -1,2 +1,2 @@
-## Projet Leap2Arduino2Tx
+## Project Leap2Arduino2Tx
 Lorem Ipsum

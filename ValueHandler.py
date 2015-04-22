@@ -17,8 +17,8 @@ class ValueHandler():
 			self.dualRates.append(1)				# Default is off: rate is 1 (max)
 
 
-	def getOutput(self, channelValue):
-		return int(round(self.mapValue(channelValue)))
+	def getOutput(self, channelValue, channel):
+		return int(round(self.mapValue(self.calcExponential(channelValue, channel))))
 
 
 
@@ -36,14 +36,14 @@ class ValueHandler():
 
 
 
-	def calcExponential(self, value):
+	def calcExponential(self, value, channel): 				# Rangeing from 0 to 1
 
-		if self.exponential != 0:
+		if self.exponentials[channel] != 0:
+
 			negative = False if value > 0 else True
-
-			value = math.pow(abs(value), 1 + self.exponential)
-
+			value = math.pow(abs(value), 1 + self.exponentials[channel])
 			return value * -1 if negative else value
+
 		else:
 			return value
 
