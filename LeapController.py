@@ -1,5 +1,5 @@
 import os, sys, inspect, thread, time
-sys.path.insert(0, "lib")
+sys.path.insert(0, "LeapSDK")
 import Leap
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 from Communication import Communication
