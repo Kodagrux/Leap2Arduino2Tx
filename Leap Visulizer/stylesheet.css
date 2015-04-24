@@ -1,0 +1,54 @@
+.wrap {
+	perspective: 1000px; 
+	perspective-origin: 100px 100px;
+	margin: 200px;
+	margin-left: 600px;
+	font-family: "Helvetica";
+}
+
+
+#cube {
+	position: relative;
+	width: 200px;
+	transform-style: preserve-3d;
+	-webkit-transform-origin: 100px 100px;
+	/*-webkit-animation: spin 5s infinite linear;*/
+}
+
+#cube div {
+	position: absolute;
+	width: 200px;
+	height: 110px;
+	padding-top: 90px;
+	text-align: center;
+}
+
+.back {
+	transform: translateZ(-100px) rotateY(180deg);
+	background-color: rgba(255, 0, 0, 0.5);
+}
+.right {
+	transform: rotateY(-270deg) translateX(100px);
+	transform-origin: top right;
+	background-color: rgba(255, 255, 0, 0.5);
+}
+.left {
+	transform: rotateY(270deg) translateX(-100px);
+	transform-origin: center left;
+	background-color: rgba(255, 0, 255, 0.5);
+}
+.top {
+	transform: rotateX(-90deg) translateY(-100px);
+	transform-origin: top center;
+	background-color: rgba(0, 255, 255, 0.5);
+}
+.bottom {
+	transform: rotateX(90deg) translateY(100px);
+	transform-origin: bottom center;
+	background-color: rgba(0, 255, 0, 0.5);
+}
+.front {
+	transform: translateZ(100px);
+	background-color: rgba(0, 0, 255, 0.8);
+}
+
