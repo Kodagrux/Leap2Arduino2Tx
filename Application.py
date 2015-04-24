@@ -19,6 +19,7 @@ class Application(Frame):
 		self.sendingThreadActive = False
 
 
+
 	def setupUI(self):
 
 		self.parent.title("Leap2Arduino2Tx")
