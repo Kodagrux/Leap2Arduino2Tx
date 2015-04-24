@@ -11,7 +11,7 @@ The beauties of Leap2Arduino2Tx are that it requires **no alteration** of you cu
 
 
 ### Disclaimer
-Eventhough this project 
+Eventhough this process worked for me, without destroying my gear, doesn't mean it will work for you. If your plane crashes, your transmitter breakes or your multirotor decides to make a visit in the clouds, I take *no responsibility* what so ever; use at your own risk (for mor info, read the [license](https://github.com/Kodagrux/Leap2Arduino2Tx/blob/master/LICENSE.txt)).
 
 
 ### Requirements
@@ -51,33 +51,41 @@ At the moment there isn't that much too configure, but you should select the cor
 ### Controls
 The controls are designed to be as natural and intuative as possible, that beeing said I should mention that this concept is originally designed for quadrocopters **but** should feel very natural for both airplanes and helicopters (I doubt controlling cars makes as much sense; this might change, see the [Future-section](#future)). *Before* flying you sould read the [disclaimer](#disclaimer), if you haven't already.
 
-* **Yaw**:
-* **Pitch**:
-* **Roll**:
-* **Thrust**:
+When you press the "Start"-button the application starts sending the default commands to the transmitter. In order for the program to start sending *your hand gestures* you need to [clench your right fist](http://static.ddmcdn.com/gif/blogs/6a00d8341bf67c53ef0134885141e4970c-500wi.jpg) (to stop tracking, do the same). While tracking you should keep your [hand open](http://www.corbisimages.com/images/Corbis-42-23884189.jpg?size=67&uid=629fc857-b72f-488b-9eec-382be22cbfbf), keep in mind that the app att the moment only tracks your right hand.
+
+* **Yaw**: If you yaw your hand, your vehicle will yaw 
+* **Pitch**: If you pitch your hand, your vehicle will pitch
+* **Roll**: If you roll your hand, your vehicle will roll
+* **Thrust**: You have a "neutral zone" about 20 to 30 centemeters above the Leap where the thrust won't be changed. Raising your hand will increase the thrust exponentionally (the further you get from the neutral zone the faster you increase your thurst). The decreasing your thrust works the same way, the closer you get to the Leap with your hand the faster your throttle is decreased
+
+Have a look in the "Leap Visualizer"-folder for a basic web-demo of the controls. (Trust doesn't work as it does in the app, instead you control that with the height of your left hand).
 
 
 ### Future 
+The following are features I would like to incorporate into the application in the future:
+
 * Add more channels (only 4 are currently used) and features
 * Test it with more transmitters (Futuba, Spektrum, etc.)
 * Add more ways of controlling (JoySticks, Nunchucks, etc.)
 * Add more features in GUI (exponentials, mixing, triming, mapping etc.)
-* Figure out a way to create the PPM signal from a computers headphone-jack, [like such](https://github.com/kangsterizer/Audio_PPM_Linux), or get a [USB-to-3,5 mm cable](http://www.hobbyking.com/hobbyking/store/__24348__USB_Simulator_Lead_for_Turnigy_GTX3_Transmitter_VRC_Sim_Compatible.html) and use that as an interface instead.
+* Figure out a way to create the PPM signal from a computers headphone-jack, [like such](https://github.com/kangsterizer/Audio_PPM_Linux), or get a [USB-to-3,5 mm cable](http://www.hobbyking.com/hobbyking/store/__24348__USB_Simulator_Lead_for_Turnigy_GTX3_Transmitter_VRC_Sim_Compatible.html) and use that as an interface instead
 * Add more [controller modes](http://cdn.instructables.com/FNZ/WM1L/HINOEL7Z/FNZWM1LHINOEL7Z.LARGE.jpg) (the current is Mode 2)
-* Add mode flight-modes and a camera-mode
+* Add mode flight-modes (multirotor/car/helicopter/airplane specific) and a camera-mode
 * Package everything into one application with an icon and everything
+* Toggle between right-handed and left-handed (currently only righthanded)
+* Update the "Leap Visualizer" so that it matches the app
 
 
 ### Known Issues
 * The UI sometimes freezes (but the commands are still beeing sent)
-* The program only sends channel-updates every 0.05 seconds (due to limitations in the Arduino hardware), this isn't really a problem since it's fast enough, but users should be aware.
+* The program only sends channel-updates every 0.05 seconds (due to limitations in the Arduino hardware), this isn't really a problem since it's fast enough, but users should be aware
 
 
 ### FAQ
 
 
 ### Inspirations
-The following links really helped me out/inspired me with this project
+The following links really helped me out/inspired me with this project:
 
 * ["Manucon" by RaptorTech](https://github.com/RaptorTech/Manucon)
 * [This Arduino-forum-thread](http://forum.arduino.cc/index.php?topic=8755.0)
@@ -86,9 +94,9 @@ The following links really helped me out/inspired me with this project
 * [This YouTube-clip](https://www.youtube.com/watch?v=bBjPMjqcHAc&index=24&list=PLQeQz14wJz9wJsa7t_YXuZ6bZSYEfz1Tr)
 
 
-###About this project
-This project is created by, and currently only maintained by, [Arvid Bräne](http://arvidbrane.com)
+### About this project
+This project is created by, and currently only maintained by, [Arvid Bräne](http://arvidbrane.com).
 
 
-###License
-See the license 
+### License
+GNU v.3, see the [license](https://github.com/Kodagrux/Leap2Arduino2Tx/blob/master/LICENSE.txt). 
