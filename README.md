@@ -81,9 +81,6 @@ The following are features I would like to incorporate into the application in t
 * The program only sends channel-updates every 0.05 seconds (due to limitations in the Arduino hardware), this isn't really a problem since it's fast enough, but users should be aware
 
 
-### FAQ
-
-
 ### Inspirations
 The following links really helped me out/inspired me with this project:
 
