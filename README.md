@@ -91,3 +91,4 @@ This project is created by, and currently only maintained by, [Arvid Bräne](htt
 
 
 ###License
+See the license 
