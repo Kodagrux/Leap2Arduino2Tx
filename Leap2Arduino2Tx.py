@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 # Imports
-import time
 from Tkinter import *
 
 from ValueHandler import ValueHandler
@@ -26,8 +25,8 @@ parameter = {
 	'maxInput' : 1,
 	'minInput' : -1,
 
-	'exponentials' : [0.5, 0.5, 0, 0.5, 0, 0, 0, 0],
-	'controllerTrim' : [0, -0.25, 0, 0, 0, 0, 0, 0],
+	'exponentials' : [0.6, 0.6, 0, 0.6, 0, 0, 0, 0],
+	'controllerTrim' : [0, -0.2, 0, 0, 0, 0, 0, 0],
 
 	'defaultChannelData': [],
 	'channelData': [],

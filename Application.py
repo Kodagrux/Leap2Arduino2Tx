@@ -16,7 +16,7 @@ class Application(Frame):
 
 		self.setupUI()
 
-		self.sendingThreadActive = False		
+		self.sendingThreadActive = False
 
 
 	def setupUI(self):
@@ -27,9 +27,6 @@ class Application(Frame):
 
 		# Create Canvas
 		self.canvas = Canvas(self, relief = FLAT, background = "white", width = 800, height = 440)
-		
-
-		#self.canvas.create_rectangle(150, 10, 240, 80, outline="#f50", fill="#f50")
 
 		# Stick Containers
 		self.leftStick = self.canvas.create_oval(130, 100, 330, 300, outline='gray80', fill='gray90', tags=('leftStick'))
@@ -54,6 +51,18 @@ class Application(Frame):
 		self.startButton = Button(self, text = "Start", command = self.startSending, anchor = W)
 		self.startButton.configure(width = 10, activebackground = "#33B5E5", relief = FLAT)
 		self.startButton_window = self.canvas.create_window(10, 10, anchor=NW, window=self.startButton)
+
+		# Status
+		self.statusText = self.canvas.create_text(400, 370, text="STATUS", fill="gray30")
+
+		comPorts = self.comLink.getPorts()
+		#print self.comLink.getPorts()
+			
+		# COM-port option menu
+		self.optionMenuVariable = StringVar(self.parent)
+		self.optionMenuVariable.set(comPorts[0]) # initial value
+		self.optionMenu = apply(OptionMenu, (self.parent, self.optionMenuVariable) + tuple(comPorts))
+		self.optionMenu.pack()
 
 
 		#self.grid()
@@ -102,8 +111,7 @@ class Application(Frame):
 
 
 	def startSending(self):
-
-		#self.comLink.connect() 		# Connects to Arduino
+		self.comLink.connect(self.optionMenuVariable.get()) 		# Connects to Arduino
 
 		self.sendingThreadActive = True
 		self.startButton.configure(text="Stop", command=self.stopSending)
@@ -117,6 +125,7 @@ class Application(Frame):
 
 		self.sendingThreadActive = False
 		self.startButton.configure(text="Start", command=self.startSending)
+		self.comLink.disconnect()
 
 
 
@@ -156,15 +165,15 @@ class Application(Frame):
 
 		for x in xrange(0, self.parameter['nrChannels']):
 
-			# Calculaate the output using Value Handler
+			# Calculate the output using Value Handler
 			output = self.parameter['channelOutput'][x] = self.valueHandler.getOutput(self.parameter['channelData'][x], x)
 			
 			# Finalize the string
 			finalString = finalString + str(output) + ("," if self.parameter['nrChannels'] - 1 != x else "") 		# Value 
 
 		# Send the data
-		print finalString
-		#self.comLink.send(finalString)
+		#print finalString
+		self.comLink.send(finalString)
 
 
 
@@ -190,6 +199,8 @@ class Application(Frame):
 			self.canvas.coords(self.leftKnob, (newLeftPosX, newLeftPosY, newLeftPosX + 30, newLeftPosY + 30))
 			self.canvas.coords(self.rightKnob, (newRightPosX, newRightPosY, newRightPosX + 30, newRightPosY + 30))
 
+			self.canvas.itemconfig(self.statusText, text=str(self.parameter['channelOutput']))
+
 			time.sleep(delay)
 
 			# Thread 'breaker'
@@ -214,7 +225,9 @@ class Application(Frame):
 
 
 	def quitApp(self):
-
+		if self.sendingThreadActive:
+			self.stopSending()
+			time.sleep(0.05)
 		self.destroy()  
 		self.quit()  
 

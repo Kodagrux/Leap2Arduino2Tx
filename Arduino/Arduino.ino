@@ -44,7 +44,7 @@ void setup() {
 
 void loop() {
   timer.run();
-  Serial.println(nrOfCh);
+  //Serial.println(nrOfCh);
   if (stringComplete) {
     ParseSerialData();  
     inString = "";    
