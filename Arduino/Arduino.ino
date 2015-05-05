@@ -1,7 +1,6 @@
 #include <SimpleTimer.h>
 #define PPM_PIN 2
 
-// the timer object
 SimpleTimer timer;
 
 char inData[100];

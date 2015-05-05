@@ -6,7 +6,7 @@ class Application(Frame):
 	""" Handles UI """
 
 	def __init__(self, parent, controller, comLink, valueHandler, parameter):
-		Frame.__init__(self, parent) # Original constructor
+		Frame.__init__(self, parent) 		# Original constructor
 
 		self.parent = parent
 		self.controller = controller
@@ -61,7 +61,10 @@ class Application(Frame):
 			
 		# COM-port option menu
 		self.optionMenuVariable = StringVar(self.parent)
-		self.optionMenuVariable.set(comPorts[0]) # initial value
+		if len(comPorts) == 1:
+			self.optionMenuVariable.set(comPorts[0]) # initial value
+		else:
+			self.optionMenuVariable.set(comPorts[len(comPorts)-1]) 
 		self.optionMenu = apply(OptionMenu, (self.parent, self.optionMenuVariable) + tuple(comPorts))
 		self.optionMenu.pack()
 
@@ -161,7 +164,6 @@ class Application(Frame):
 
 
 	def sendData(self):
-
 		finalString = ""
 
 		for x in xrange(0, self.parameter['nrChannels']):

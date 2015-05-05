@@ -27,11 +27,11 @@ class LeapListener(Leap.Listener):
 
 				rightHandVisable = True
 
-				if self.parent.track:
-					self.rawControllerData[0] = (normal.roll * -1) + self.parent.trim[0]
-					self.rawControllerData[1] = direction.pitch + self.parent.trim[1]
-					self.rawControllerData[2] = hand.palm_position[1] + self.parent.trim[2]
-					self.rawControllerData[3] = direction.yaw + self.parent.trim[3]
+				if self.parent.track and hand.grab_strength < 0.5:
+					self.rawControllerData[0] = (self.rawControllerData[0] + (normal.roll * -1) + self.parent.trim[0]) / 2
+					self.rawControllerData[1] = (self.rawControllerData[1] + direction.pitch + self.parent.trim[1]) / 2
+					self.rawControllerData[2] = (self.rawControllerData[2] + hand.palm_position[1] + self.parent.trim[2]) / 2
+					self.rawControllerData[3] = (self.rawControllerData[3] + direction.yaw + self.parent.trim[3]) / 2
 					
 				
 				if hand.grab_strength == 1 and self.lastFrameRightHandOpen: 
@@ -69,6 +69,7 @@ class LeapMotion():
 		#self.thrustIncreaseMid = (self.thrustIncreaseMax + self.thrustIncreaseMin) / 2
 		self.thrustDecreaseMax = 80
 		self.thrustDecreaseMin = 149
+		self.thrustSpeed = 0.06
 		#self.thrustDecreaseMid = (self.thrustDecreaseMax + self.thrustDecreaseMin) / 2
 
 		self.trim = trim
@@ -99,12 +100,12 @@ class LeapMotion():
 	def calcThrust(self, newThrust, currentThrust):
 		if newThrust >= self.thrustNeuteralMax: 	# Increase Thrust
 
-			currentThrust = currentThrust + self.mapThrust(newThrust, self.thrustIncreaseMax, self.thrustIncreaseMin, 0.1, 0)
+			currentThrust = currentThrust + self.mapThrust(newThrust, self.thrustIncreaseMax, self.thrustIncreaseMin, self.thrustSpeed, 0)
 			currentThrust = 1 if currentThrust > 1 else currentThrust
 
 		elif newThrust <= self.thrustNeuteralMin:	# Decrease Thrust
 
-			currentThrust = currentThrust + self.mapThrust(newThrust, self.thrustDecreaseMin, self.thrustDecreaseMax, 0, -0.1)
+			currentThrust = currentThrust + self.mapThrust(newThrust, self.thrustDecreaseMin, self.thrustDecreaseMax, 0, -self.thrustSpeed)
 			currentThrust = -1 if currentThrust < -1 else currentThrust
 
 		return currentThrust

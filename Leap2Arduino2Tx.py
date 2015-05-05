@@ -19,13 +19,14 @@ valueHandler = 0
 # Variables
 global parameter
 parameter = {
-	'maxOutput' : 1100,
-	'minOutput' : 0, 
+	'maxOutput' : 940,
+	'minOutput' : 110, 
 
 	'maxInput' : 1,
 	'minInput' : -1,
 
-	'exponentials' : [0.6, 0.6, 0, 0.6, 0, 0, 0, 0],
+	'exponentials' : [0.1, 0.1, 0, 0.1, 0, 0, 0, 0],
+	'dualRates' : [0.6, 0.6, 1, 0.6, 1, 1, 1, 1],
 	'controllerTrim' : [0, -0.2, 0, 0, 0, 0, 0, 0],
 
 	'defaultChannelData': [],
@@ -42,7 +43,7 @@ parameter['defaultChannelData'].append(parameter['midInput']) 		# Channel 1: Ail
 parameter['defaultChannelData'].append(parameter['midInput'])		# Channel 2: Elevator
 parameter['defaultChannelData'].append(parameter['minInput']) 		# Channel 3: Thrust
 parameter['defaultChannelData'].append(parameter['midInput']) 		# Channel 4: Rudder
-parameter['defaultChannelData'].append(parameter['midInput'])		# Channel 5: Gear
+parameter['defaultChannelData'].append(parameter['minInput'])		# Channel 5: Gear
 parameter['defaultChannelData'].append(parameter['midInput']) 		# Channel 6: Pit
 parameter['defaultChannelData'].append(parameter['midInput'])		# Channel 7: Aux 1
 parameter['defaultChannelData'].append(parameter['midInput'])   	# Channel 8: Aux 2
@@ -66,6 +67,7 @@ def initialSetup():
 	global valueHandler
 	valueHandler = ValueHandler(parameter['maxOutput'], parameter['minOutput'], parameter['maxInput'], parameter['minInput'], parameter['nrChannels'])
 	valueHandler.setExponentials(parameter['exponentials'])
+	valueHandler.setDualRates(parameter['dualRates'])
 
 	for x in xrange(0, parameter['nrChannels']):
 		parameter['channelData'].append(parameter['defaultChannelData'][x]) 							# Reset the starting values

@@ -19,7 +19,8 @@ class ValueHandler():
 
 
 	def getOutput(self, channelValue, channel):
-		return int(round(self.mapValue(self.calcExponential(channelValue, channel))))
+		
+		return int(round(self.mapValue(self.calcDualRate(self.calcExponential(self.calcEndpoints(channelValue), channel), channel))))
 
 
 
@@ -50,12 +51,21 @@ class ValueHandler():
 
 
 
-	def calcDualRate(self, value):
+	def calcDualRate(self, value, channel):
 
-		if self.dualRate != 1:
-			return value * self.dualRate
+		if self.dualRates[channel] < 1 and self.dualRates[channel] > 0:
+			return value * self.dualRates[channel]
 		else:
 			return value
+
+
+
+	def calcEndpoints(self, value):
+
+		value = self.maxInput if value > self.maxInput else value
+		value = self.minInput if value < self.minInput else value
+
+		return value
 
 
 
@@ -84,8 +94,6 @@ class ValueHandler():
 
 		for x in xrange(0, self.nrChannels):
 			self.setDualRate(dualRates[x], x)
-
-
 
 
 
