@@ -50,8 +50,12 @@ class Communication():
 
 	def disconnect(self):
 		if hasattr(self, 'ser'):
-			self.ser.close();
-			self.ser = None
+			try:
+				self.ser.close();
+			except Exception as e:
+				print e.message
+
+		self.ser = None
 
 
 

@@ -3,7 +3,6 @@ from Tkinter import *
 
 
 class Application(Frame):
-	""" Handles UI """
 
 	def __init__(self, parent, controller, comLink, valueHandler, parameter):
 		Frame.__init__(self, parent) 		# Original constructor
@@ -17,6 +16,7 @@ class Application(Frame):
 		self.setupUI()
 
 		self.sendingThreadActive = False
+		self.sending = False
 
 
 
@@ -69,85 +69,55 @@ class Application(Frame):
 		self.optionMenu.pack()
 
 
-		#self.grid()
-		#self.create_widgets()
-		#self.reveal()
-		#self.canvas.pack(fill=BOTH, expand=1)
 
-
-
-	def create_widgets(self):
-		""" create button, text and entry widget """
-		self.instruction = Label(self, text = 'Status')
-
-		""" Sets row, column and span. Sticky = west, ie left side """
-		self.instruction.grid(row = 0, column = 0, columnspan = 2, sticky = W)
-
-		# self.submit_button = Button(self, text = 'Submit', command = self.reveal)
-		# self.submit_button.grid(row = 2, column = 0, sticky = W)
-
-		#self.ball = self.canvas.create_oval(0, 20, 20, 40, outline='black', fill='gray40', tags=('ball'))
-
-		""" Wrap = tells what value will be displayed in the box """
-		'''self.text = Text(self, width = 35, height = 5, wrap = WORD)
-								self.text.grid(row = 3, column = 0, columnspan = 2, sticky = W)
-								self.text.insert(0.0, 'tjoho')'''
-
-		# Start-button
-		#self.quitButton = Button (self, text = 'Start', command = self.startSending)
-		#self.quitButton.grid(row = 4, column = 1, sticky = W)
-
-
-
-
-	def reveal(self):
-		""" Display message based on password typed in """
-		#0.0 is position (row, column)
-		textContent = 'bara shebbel'
-		self.text.delete(0.0, END)
-		self.text.insert(1.0, textContent) 
-		# self.text.insert(1.0, self.listener.gestureType) 
-		# self.text.insert(2.0, self.listener.hand_name)
-		self.after(100, self.reveal)
-
-
-
-
-
+	# Function triggered when pressing the start-button
 	def startSending(self):
-		self.comLink.connect(self.optionMenuVariable.get()) 		# Connects to Arduino
+
+		# Connects to Arduino
+		self.comLink.connect(self.optionMenuVariable.get()) 		
 
 		self.sendingThreadActive = True
 		self.startButton.configure(text="Stop", command=self.stopSending)
 
-		thread.start_new_thread(self.sendDataThread, (0.05,))		# Start thread
-		thread.start_new_thread(self.updateUIPins, (0.05,))
+		# Start threads
+		thread.start_new_thread(self.sendDataThread, (0.05,))		# Data sender/updater	
+		thread.start_new_thread(self.updateUIPins, (0.05,))			# UI updater
 
 
 
+	# Function triggered when pressing the stop-button
 	def stopSending(self):
 
 		self.sendingThreadActive = False
 		self.startButton.configure(text="Start", command=self.startSending)
+
+		# Disconnect the comLink
 		self.comLink.disconnect()
 
 
 
-
+	# Main data thread
 	def	sendDataThread(self, delay):
 
-		print "Started Sending"
+		print "Started Tracking"
 
+		# Main Loop
 		while True:
 			
-			self.updateChannelValues()
-			self.sendData()
-			time.sleep(delay)
+			# Get data from Controller
+			self.updateChannelValues() 		
 
+			# Send the data to the Arduino
+			self.sendData()	
+
+			# Delay to prefent flooding the Arduino serial-port
+			time.sleep(delay)				
+
+			# Thread 'breaker'
 			if self.sendingThreadActive is not True:
 				break
 
-		print "Stopped Sending"
+		print "Stopped Tracking"
 
 
 
@@ -157,15 +127,25 @@ class Application(Frame):
 		# Get values from controller (not the raw data but the calculated data)
 		controllerData = self.controller.updateControllerData()
 
+		# Sending 
+		oldSend = self.sending
+		self.sending = self.controller.send
+
+		if oldSend != self.sending:
+			print "Sending" if self.sending else "Not Sending"
+
 		# Put them in the array
 		for x in xrange(0, self.parameter['nrChannels']):
 			self.parameter['channelData'][x] = controllerData[x]
 			
 
 
+	# Function for formating the correct output and sending the data 
 	def sendData(self):
+
 		finalString = ""
 
+		# Looping through all the channels
 		for x in xrange(0, self.parameter['nrChannels']):
 
 			# Calculate the output using Value Handler
@@ -174,36 +154,56 @@ class Application(Frame):
 			# Finalize the string
 			finalString = finalString + str(output) + ("," if self.parameter['nrChannels'] - 1 != x else "") 		# Value 
 
-		# Send the data
-		#print finalString
-		self.comLink.send(finalString)
+		# Send the data 
+		if self.sending:
+			self.comLink.send(finalString)
 
 
 
 	
 
-
+	# Function for updating the UI Pins during flight
 	def updateUIPins(self, delay):
 
+		# Original stick containers
 		originalLeftStickCoordinates = self.canvas.coords(self.leftStick)
 		originalRightStickCoordinates = self.canvas.coords(self.rightStick)
 
+		# Basic correction of the max/min from stick containers
+		minCorrection = 26 
+		maxCorrection = 30
+
+		# Main Loop
 		while True:
 
 			# Get new values for left knob
-			newLeftPosX = self.calPinsOffset(self.parameter['maxOutput'] - self.parameter['channelOutput'][3], self.parameter['maxOutput'], self.parameter['minOutput'], originalLeftStickCoordinates[0], originalLeftStickCoordinates[2]-30)
-			newLeftPosY = self.calPinsOffset(self.parameter['channelOutput'][2], self.parameter['maxOutput'], self.parameter['minOutput'], originalLeftStickCoordinates[1], originalLeftStickCoordinates[3]-30)
+			newLeftPosX = self.calPinsOffset(self.parameter['maxOutput'] - self.parameter['channelOutput'][3], self.parameter['maxOutput'], self.parameter['minOutput'], originalLeftStickCoordinates[0]-minCorrection, originalLeftStickCoordinates[2]-maxCorrection)
+			newLeftPosY = self.calPinsOffset(self.parameter['channelOutput'][2], self.parameter['maxOutput'], self.parameter['minOutput'], originalLeftStickCoordinates[1]-minCorrection, originalLeftStickCoordinates[3]-maxCorrection)
 
 			# Get new values for right knob
-			newRightPosX = self.calPinsOffset(self.parameter['maxOutput'] - self.parameter['channelOutput'][0], self.parameter['maxOutput'], self.parameter['minOutput'], originalRightStickCoordinates[0], originalRightStickCoordinates[2]-30)
-			newRightPosY = self.calPinsOffset(self.parameter['maxOutput'] - self.parameter['channelOutput'][1], self.parameter['maxOutput'], self.parameter['minOutput'], originalRightStickCoordinates[1], originalRightStickCoordinates[3]-30)
+			newRightPosX = self.calPinsOffset(self.parameter['maxOutput'] - self.parameter['channelOutput'][0], self.parameter['maxOutput'], self.parameter['minOutput'], originalRightStickCoordinates[0]-minCorrection, originalRightStickCoordinates[2]-maxCorrection)
+			newRightPosY = self.calPinsOffset(self.parameter['maxOutput'] - self.parameter['channelOutput'][1], self.parameter['maxOutput'], self.parameter['minOutput'], originalRightStickCoordinates[1]-minCorrection, originalRightStickCoordinates[3]-maxCorrection)
 
 			# Apply changes and move accoridngly
 			self.canvas.coords(self.leftKnob, (newLeftPosX, newLeftPosY, newLeftPosX + 30, newLeftPosY + 30))
 			self.canvas.coords(self.rightKnob, (newRightPosX, newRightPosY, newRightPosX + 30, newRightPosY + 30))
 
+			# Prints status
 			self.canvas.itemconfig(self.statusText, text=str(self.parameter['channelOutput']))
 
+			# Changing colors on Pins
+			if self.sending:
+
+				# Red
+				self.canvas.itemconfig(self.leftKnob, fill='red', outline='gray30')
+				self.canvas.itemconfig(self.rightKnob, fill='red', outline='gray30')
+			else:
+
+				# Original values 
+				self.canvas.itemconfig(self.leftKnob, outline='gray60', fill='gray70')
+				self.canvas.itemconfig(self.rightKnob, outline='gray60', fill='gray70')
+
+			# Sleep
 			time.sleep(delay)
 
 			# Thread 'breaker'
@@ -212,6 +212,7 @@ class Application(Frame):
 
 
 
+	# Calculates the correct position of the Pins
 	def calPinsOffset(self, value, maxInput, minInput, maxOutput, minOutput):
 
 		value = maxInput if value > maxInput else value
@@ -226,11 +227,15 @@ class Application(Frame):
 
 
 
-
+	# Exit procedure
 	def quitApp(self):
+
+		# Stop sending (if it was)
 		if self.sendingThreadActive:
 			self.stopSending()
 			time.sleep(0.05)
+
+		# GUI-stuff
 		self.destroy()  
 		self.quit()  
 

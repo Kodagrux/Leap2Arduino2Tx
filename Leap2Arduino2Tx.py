@@ -67,7 +67,7 @@ def initialSetup():
 	global valueHandler
 	valueHandler = ValueHandler(parameter['maxOutput'], parameter['minOutput'], parameter['maxInput'], parameter['minInput'], parameter['nrChannels'])
 	valueHandler.setExponentials(parameter['exponentials'])
-	valueHandler.setDualRates(parameter['dualRates'])
+	#valueHandler.setDualRates(parameter['dualRates'])
 
 	for x in xrange(0, parameter['nrChannels']):
 		parameter['channelData'].append(parameter['defaultChannelData'][x]) 							# Reset the starting values

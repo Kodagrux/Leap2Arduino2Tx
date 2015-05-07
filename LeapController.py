@@ -10,6 +10,7 @@ class LeapListener(Leap.Listener):
 	def setup(self, parent):
 		self.parent = parent
 		self.rawControllerData = self.parent.rawControllerData #[0,0,0,0,0,0,0,0]
+		self.rawControllerData[2] = self.parent.thrustDecreaseMax
 		self.lastFrameRightHandOpen = True
 
 
@@ -33,23 +34,37 @@ class LeapListener(Leap.Listener):
 					self.rawControllerData[2] = (self.rawControllerData[2] + hand.palm_position[1] + self.parent.trim[2]) / 2
 					self.rawControllerData[3] = (self.rawControllerData[3] + direction.yaw + self.parent.trim[3]) / 2
 					
-				
-				if hand.grab_strength == 1 and self.lastFrameRightHandOpen: 
+				# Toggle tracking
+				if hand.grab_strength == 1 and self.lastFrameRightHandOpen:
 					self.parent.track = not self.parent.track
 
+				# Toggle sending
+				if hand.pinch_strength == 1 and self.lastFramePinch and hand.grab_strength != 1:
+					if not self.parent.send and self.parent.track:
+						self.parent.send = True
+					elif self.parent.send:
+						self.parent.send = False
 
-				#print self.lastFrameRightHandOpen
+				# Last-frame variables 
 				self.lastFrameRightHandOpen = True if hand.grab_strength != 1 else False
+				self.lastFramePinch = True if hand.pinch_strength != 1 else False
 
-		if rightHandVisable == False: # Saftey feature so the hand resets if no righthand is visable 
+		# Saftey feature so the hand resets if no righthand is visable 
+		if rightHandVisable == False: 
 			self.rawControllerData[0] = self.parent.defaultChannelData[0]
 			self.rawControllerData[1] = self.parent.defaultChannelData[1]
-			self.rawControllerData[2] = self.parent.thrustNeuteralMid
+			if self.parent.thustControllerMode == 1:
+				self.rawControllerData[2] = (self.rawControllerData[2] - 0.7) if (self.rawControllerData[2] - 0.7) >= self.parent.thrustDecreaseMax else self.parent.thrustDecreaseMax
+			else:
+				self.rawControllerData[2] = self.parent.thrustNeuteralMid
 			self.rawControllerData[3] = self.parent.defaultChannelData[3]
 			self.parent.track = False
+			self.parent.send = False
 
 
 		self.lastFrame = frame
+
+		#print self.parent.send
 
 		#print str(self.rawControllerData)
 
@@ -61,6 +76,7 @@ class LeapMotion():
 	def __init__(self, defaultChannelData, nrChannels, trim):
 
 		self.track = False
+		self.send = False
 		self.thrustNeuteralMax = 250
 		self.thrustNeuteralMin = 150
 		self.thrustNeuteralMid = (self.thrustNeuteralMax + self.thrustNeuteralMin) / 2
@@ -70,6 +86,7 @@ class LeapMotion():
 		self.thrustDecreaseMax = 80
 		self.thrustDecreaseMin = 149
 		self.thrustSpeed = 0.06
+		self.thustControllerMode = 1
 		#self.thrustDecreaseMid = (self.thrustDecreaseMax + self.thrustDecreaseMin) / 2
 
 		self.trim = trim
@@ -88,9 +105,9 @@ class LeapMotion():
 		#print "INNAN " + str(self.controllerData) 
 		#self.rawControllerData = self.listener.rawControllerData
 
-		thrust = self.calcThrust(self.rawControllerData[2], self.controllerData[2]);
+		thrust = self.calcThrust(self.rawControllerData[2], self.controllerData[2])
 		self.controllerData = list(self.rawControllerData)
-		self.controllerData[2] = thrust;
+		self.controllerData[2] = thrust
 		#print self.controllerData
 		
 		return self.controllerData
@@ -98,17 +115,22 @@ class LeapMotion():
 
 
 	def calcThrust(self, newThrust, currentThrust):
-		if newThrust >= self.thrustNeuteralMax: 	# Increase Thrust
 
-			currentThrust = currentThrust + self.mapThrust(newThrust, self.thrustIncreaseMax, self.thrustIncreaseMin, self.thrustSpeed, 0)
-			currentThrust = 1 if currentThrust > 1 else currentThrust
+		if self.thustControllerMode == 1:
+			#print self.mapThrust(newThrust, self.thrustIncreaseMax, self.thrustDecreaseMax, 1, -1)
+			return self.mapThrust(newThrust, self.thrustIncreaseMax, self.thrustDecreaseMax, 1, -1)
+		else:
+			if newThrust >= self.thrustNeuteralMax: 	# Increase Thrust
 
-		elif newThrust <= self.thrustNeuteralMin:	# Decrease Thrust
+				currentThrust = currentThrust + self.mapThrust(newThrust, self.thrustIncreaseMax, self.thrustIncreaseMin, self.thrustSpeed, 0)
+				currentThrust = 1 if currentThrust > 1 else currentThrust
 
-			currentThrust = currentThrust + self.mapThrust(newThrust, self.thrustDecreaseMin, self.thrustDecreaseMax, 0, -self.thrustSpeed)
-			currentThrust = -1 if currentThrust < -1 else currentThrust
+			elif newThrust <= self.thrustNeuteralMin:	# Decrease Thrust
 
-		return currentThrust
+				currentThrust = currentThrust + self.mapThrust(newThrust, self.thrustDecreaseMin, self.thrustDecreaseMax, 0, -self.thrustSpeed)
+				currentThrust = -1 if currentThrust < -1 else currentThrust
+
+			return currentThrust
 
 
 
@@ -133,8 +155,6 @@ class LeapMotion():
 
 	def exit(self):
 		self.controller.remove_listener(self.listener)
-
-
 
 
 
