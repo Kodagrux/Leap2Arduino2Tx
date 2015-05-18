@@ -170,23 +170,26 @@ class Application(Frame):
 		originalRightStickCoordinates = self.canvas.coords(self.rightStick)
 
 		# Basic correction of the max/min from stick containers
-		minCorrection = 26 
-		maxCorrection = 30
+		minCorrection = 0 
+		maxCorrection = 0
 
 		# Main Loop
 		while True:
 
 			# Get new values for left knob
-			newLeftPosX = self.calPinsOffset(self.parameter['maxOutput'] - self.parameter['channelOutput'][3], self.parameter['maxOutput'], self.parameter['minOutput'], originalLeftStickCoordinates[0]-minCorrection, originalLeftStickCoordinates[2]-maxCorrection)
-			newLeftPosY = self.calPinsOffset(self.parameter['channelOutput'][2], self.parameter['maxOutput'], self.parameter['minOutput'], originalLeftStickCoordinates[1]-minCorrection, originalLeftStickCoordinates[3]-maxCorrection)
+			newLeftPosX = self.calPinsOffset(self.parameter['maxOutput'] + self.parameter['minOutput'] - self.parameter['channelOutput'][3], self.parameter['maxOutput'], self.parameter['minOutput'], originalLeftStickCoordinates[0] + 15, originalLeftStickCoordinates[2] - 15)
+			newLeftPosY = self.calPinsOffset(self.parameter['channelOutput'][2], self.parameter['maxOutput'], self.parameter['minOutput'], originalLeftStickCoordinates[1] + 15, originalLeftStickCoordinates[3] - 15)
 
 			# Get new values for right knob
-			newRightPosX = self.calPinsOffset(self.parameter['maxOutput'] - self.parameter['channelOutput'][0], self.parameter['maxOutput'], self.parameter['minOutput'], originalRightStickCoordinates[0]-minCorrection, originalRightStickCoordinates[2]-maxCorrection)
-			newRightPosY = self.calPinsOffset(self.parameter['maxOutput'] - self.parameter['channelOutput'][1], self.parameter['maxOutput'], self.parameter['minOutput'], originalRightStickCoordinates[1]-minCorrection, originalRightStickCoordinates[3]-maxCorrection)
+			newRightPosX = self.calPinsOffset(self.parameter['maxOutput'] + self.parameter['minOutput'] - self.parameter['channelOutput'][0], self.parameter['maxOutput'], self.parameter['minOutput'], originalRightStickCoordinates[0] + 15, originalRightStickCoordinates[2] - 15)
+			newRightPosY = self.calPinsOffset(self.parameter['maxOutput'] + self.parameter['minOutput'] - self.parameter['channelOutput'][1], self.parameter['maxOutput'], self.parameter['minOutput'], originalRightStickCoordinates[1] + 15, originalRightStickCoordinates[3] - 15)
 
 			# Apply changes and move accoridngly
-			self.canvas.coords(self.leftKnob, (newLeftPosX, newLeftPosY, newLeftPosX + 30, newLeftPosY + 30))
-			self.canvas.coords(self.rightKnob, (newRightPosX, newRightPosY, newRightPosX + 30, newRightPosY + 30))
+			leftCorr = 30
+			rightCorr = 0
+
+			self.canvas.coords(self.leftKnob, (newLeftPosX - 15, newLeftPosY - 15, newLeftPosX + 15, newLeftPosY + 15))
+			self.canvas.coords(self.rightKnob, (newRightPosX - 15, newRightPosY - 15, newRightPosX + 15, newRightPosY + 15))
 
 			# Prints status
 			self.canvas.itemconfig(self.statusText, text=str(self.parameter['channelOutput']))
@@ -238,9 +241,6 @@ class Application(Frame):
 		# GUI-stuff
 		self.destroy()  
 		self.quit()  
-
-
-
 
 
 

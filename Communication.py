@@ -55,7 +55,7 @@ class Communication():
 			except Exception as e:
 				print e.message
 
-		self.ser = None
+			#self.ser = None
 
 
 

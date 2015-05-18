@@ -81,7 +81,7 @@ def initialSetup():
 
 	global appGUI
 	appGUI = Tk()
-	appGUI.geometry('800x700+100+100')
+	appGUI.geometry('800x500+100+100')
 
 	global application
 	application = Application(appGUI, controller, comLink, valueHandler, parameter)
