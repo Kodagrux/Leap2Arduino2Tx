@@ -16,7 +16,6 @@ class Communication():
 
 	def connect(self, port):
 		self.port = port
-		print port
 		if not hasattr(self, 'ser'):
 			try:
 				self.ser = serial.Serial(self.port, self.speed)

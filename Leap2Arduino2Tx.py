@@ -19,20 +19,23 @@ valueHandler = 0
 # Variables
 global parameter
 parameter = {
-	'maxOutput' : 940,
-	'minOutput' : 110, 
+	'maxOutput' : 937,
+	'minOutput' : 113, 
 
 	'maxInput' : 1,
 	'minInput' : -1,
 
 	'exponentials' : [0.1, 0.1, 0, 0.1, 0, 0, 0, 0],
-	'dualRates' : [0.6, 0.6, 1, 0.6, 1, 1, 1, 1],
+	'dualRates' : [0.8, 0.8, 1, 0.8, 1, 1, 1, 1],
 	'controllerTrim' : [0, -0.2, 0, 0, 0, 0, 0, 0],
 
 	'defaultChannelData': [],
 	'channelData': [],
 	'channelOutput': [],
-	'nrChannels': 8
+	'nrChannels': 8,
+	'nrActiveChannels': 4,
+
+	'sendingDelay': 0.03
 }
 
 #Aditional parameters
@@ -44,13 +47,13 @@ parameter['defaultChannelData'].append(parameter['midInput'])		# Channel 2: Elev
 parameter['defaultChannelData'].append(parameter['minInput']) 		# Channel 3: Thrust
 parameter['defaultChannelData'].append(parameter['midInput']) 		# Channel 4: Rudder
 parameter['defaultChannelData'].append(parameter['minInput'])		# Channel 5: Gear
-parameter['defaultChannelData'].append(parameter['midInput']) 		# Channel 6: Pit
-parameter['defaultChannelData'].append(parameter['midInput'])		# Channel 7: Aux 1
-parameter['defaultChannelData'].append(parameter['midInput'])   	# Channel 8: Aux 2
-parameter['defaultChannelData'].append(parameter['midInput'])    	# Channel 9: Aux 3
-parameter['defaultChannelData'].append(parameter['midInput'])    	# Channel 10: Aux 4
-parameter['defaultChannelData'].append(parameter['midInput'])    	# Channel 11: Aux 5
-parameter['defaultChannelData'].append(parameter['midInput'])    	# Channel 12: Aux 6
+parameter['defaultChannelData'].append(parameter['minInput']) 		# Channel 6: Pit
+parameter['defaultChannelData'].append(parameter['minInput'])		# Channel 7: Aux 1
+parameter['defaultChannelData'].append(parameter['minInput'])   	# Channel 8: Aux 2
+parameter['defaultChannelData'].append(parameter['minInput'])    	# Channel 9: Aux 3
+parameter['defaultChannelData'].append(parameter['minInput'])    	# Channel 10: Aux 4
+parameter['defaultChannelData'].append(parameter['minInput'])    	# Channel 11: Aux 5
+parameter['defaultChannelData'].append(parameter['minInput'])    	# Channel 12: Aux 6
 
 def main():
 	#appGUI.mainloop()
@@ -81,7 +84,7 @@ def initialSetup():
 
 	global appGUI
 	appGUI = Tk()
-	appGUI.geometry('800x500+100+100')
+	appGUI.geometry('800x468+100+100')
 
 	global application
 	application = Application(appGUI, controller, comLink, valueHandler, parameter)

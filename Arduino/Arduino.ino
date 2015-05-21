@@ -1,5 +1,12 @@
 #include <SimpleTimer.h>
 #define PPM_PIN 2
+#define THRUST_PIN A0
+
+#define ERROR_PIN 11
+#define STATUS_PIN 12
+#define TX_PIN 13
+
+boolean thurstControl = false;
 
 SimpleTimer timer;
 
@@ -32,6 +39,13 @@ void ppmoutput() {
 void setup() {
   nrOfCh = 8;
   Serial.begin(9600);
+  
+  pinMode(ERROR_PIN, OUTPUT);
+  pinMode(STATUS_PIN, OUTPUT);
+  pinMode(TX_PIN, OUTPUT);
+  
+  startUp();
+  
   timer.setInterval(22, ppmoutput);
   pinMode(PPM_PIN, OUTPUT);
   
@@ -48,6 +62,11 @@ void loop() {
     ParseSerialData();  
     inString = "";    
     stringComplete = false; 
+    digitalWrite(TX_PIN, LOW);
+  }
+  
+  if (thurstControl) {
+    chData[2] = map(analogRead(THRUST_PIN), 0, 1023, 113, 937);
   }
 }
 
@@ -56,8 +75,14 @@ void ParseSerialData() {
   char *p = inData;
   char *str;   
   int count = 0;
-  while ((str = strtok_r(p, ",", &p)) != NULL) {  
-    chData[count] = atoi(str);
+  while ((str = strtok_r(p, ",", &p)) != NULL) {
+    if (count == 2 && atoi(str) == -1) {
+      digitalWrite(STATUS_PIN, HIGH);
+      thurstControl = true;
+      chData[count] = map(analogRead(THRUST_PIN), 0, 1023, 113, 937);
+    } else {
+      chData[count] = atoi(str);
+    }
     count++;      
   }
 }
@@ -65,13 +90,39 @@ void ParseSerialData() {
 
 void serialEvent() {
   while (Serial.available() && stringComplete == false) {
+    digitalWrite(TX_PIN, HIGH);
     char inChar = Serial.read(); 
     inData[index] = inChar; 
     index++;     
     inString += inChar;
     if (inChar == '\n') {
+      
       index = 0;
       stringComplete = true;
     }
+  }
+}
+
+void startUp() {
+  for(int i = 0; i < 3; i++) {
+    digitalWrite(ERROR_PIN, LOW);
+    digitalWrite(STATUS_PIN, LOW);
+    digitalWrite(TX_PIN, LOW);
+    delay(100);
+    digitalWrite(ERROR_PIN, HIGH);
+    digitalWrite(STATUS_PIN, HIGH);
+    digitalWrite(TX_PIN, HIGH);
+    delay(100);
+  }
+  delay(700);
+  digitalWrite(ERROR_PIN, LOW);
+  delay(100);
+  digitalWrite(STATUS_PIN, LOW);
+  delay(100);
+  digitalWrite(TX_PIN, LOW);
+  
+  
+  if (analogRead(THRUST_PIN) > 2) {
+    digitalWrite(ERROR_PIN, HIGH);
   }
 }

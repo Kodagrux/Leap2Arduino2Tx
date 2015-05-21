@@ -17,6 +17,7 @@ class Application(Frame):
 
 		self.sendingThreadActive = False
 		self.sending = False
+		self.firstSend = True
 
 
 
@@ -51,37 +52,91 @@ class Application(Frame):
 		# Start-button
 		self.startButton = Button(self, text = "Start", command = self.startSending, anchor = W)
 		self.startButton.configure(width = 10, activebackground = "#33B5E5", relief = FLAT)
-		self.startButton_window = self.canvas.create_window(10, 10, anchor=NW, window=self.startButton)
+		self.startButton_window = self.canvas.create_window(400, 200, anchor=CENTER, window=self.startButton)
 
 		# Status
-		self.statusText = self.canvas.create_text(400, 370, text="STATUS", fill="gray30")
+		self.statusText = self.canvas.create_text(400, 380, text="", fill="gray30")
 
-		comPorts = self.comLink.getPorts()
-		#print self.comLink.getPorts()
-			
+		# Nr of channels
+		self.flightChannelsVariable = IntVar()
+		self.flightChannels = Checkbutton(self, text = "Only use 4 channels", variable = self.flightChannelsVariable, onvalue = self.parameter['nrActiveChannels'], offvalue = self.parameter['nrChannels'], height=0, width = 21)
+		self.flightChannels.select()
+		self.flightChannels_window = self.canvas.create_window(315, 24, anchor=CENTER, window=self.flightChannels)
+
+
 		# COM-port option menu
-		self.optionMenuVariable = StringVar(self.parent)
+		comPorts = self.comLink.getPorts()
+		self.optionPortMenuVariable = StringVar(self.parent)
 		if len(comPorts) == 1:
-			self.optionMenuVariable.set(comPorts[0]) # initial value
+			self.optionPortMenuVariable.set(comPorts[0]) # initial value
 		else:
-			self.optionMenuVariable.set(comPorts[len(comPorts)-1]) 
-		self.optionMenu = apply(OptionMenu, (self.parent, self.optionMenuVariable) + tuple(comPorts))
-		self.optionMenu.pack()
+			self.optionPortMenuVariable.set(comPorts[len(comPorts)-1]) 
+		self.optionPortMenu = apply(OptionMenu, (self.parent, self.optionPortMenuVariable) + tuple(comPorts))
+
+		self.port_window = self.canvas.create_window(455, 24, anchor=W, window=self.optionPortMenu)
 
 
+		# Thrust mode
+		thrustMode = range(1, 4)
+		self.optionThrustMenuVariable = StringVar(self.parent)
+		self.optionThrustMenuVariable.set(thrustMode[0])
+		self.optionThrustMenu = apply(OptionMenu, (self.parent, self.optionThrustMenuVariable) + tuple(thrustMode))
+		self.thrust_window = self.canvas.create_window(100, 10, anchor=NW, window=self.optionThrustMenu)
+		self.thrust_window_text = self.canvas.create_text(15, 15, text="Thust mode: ", fill="black", anchor=NW)
+
+
+		#self.optionPortMenu.pack()
+		'''
+		nrActiveChannelsOption = range(1, self.parameter['nrChannels']+1)
+		self.optionActiveChannelMenuVariable = StringVar(self.parent)
+		self.optionActiveChannelMenuVariable.set(nrActiveChannelsOption[3])
+		self.optionActiveChannelMenu = apply(OptionMenu, (self.parent, self.optionActiveChannelMenuVariable) + tuple(nrActiveChannelsOption))
+		self.optionActiveChannelMenu.config(anchor=E)
+		self.optionActiveChannelMenu.pack()
+		'''
 
 	# Function triggered when pressing the start-button
 	def startSending(self):
 
 		# Connects to Arduino
-		self.comLink.connect(self.optionMenuVariable.get()) 		
+		self.comLink.connect(self.optionPortMenuVariable.get()) 
 
-		self.sendingThreadActive = True
+		# Locking options
+		self.flightChannels.config(state = DISABLED)
+		self.optionPortMenu.config(state = DISABLED)
+		self.optionThrustMenu.config(state = DISABLED)
 		self.startButton.configure(text="Stop", command=self.stopSending)
 
+		# Saving options
+		self.nrActiveChannels = self.flightChannelsVariable.get()
+		self.thrustOption = int(self.optionThrustMenuVariable.get())	
+
+		# Applying options
+		self.controller.thustControllerMode = self.thrustOption	
+
 		# Start threads
-		thread.start_new_thread(self.sendDataThread, (0.05,))		# Data sender/updater	
-		thread.start_new_thread(self.updateUIPins, (0.05,))			# UI updater
+		self.sendDefaults()
+		self.sendingThreadActive = True
+		thread.start_new_thread(self.sendDataThread, (self.parameter['sendingDelay'],))		# Data sender/updater	
+		thread.start_new_thread(self.updateUIPins, (self.parameter['sendingDelay']+0.03,))			# UI updater
+
+
+	# Resets the values at first send!
+	def sendDefaults(self):
+
+		finalString = ""
+
+		for x in xrange(0, self.parameter['nrChannels']):
+			self.parameter['channelData'][x] = self.parameter['defaultChannelData'][x]
+			output = self.parameter['channelOutput'][x] = self.valueHandler.getOutput(self.parameter['channelData'][x], x)
+
+			if x == 2 and self.thrustOption == 3: 
+				output = self.parameter['channelOutput'][x] = -1
+
+			finalString = finalString + str(output) + ("," if self.parameter['nrChannels'] - 1 != x else "") 
+
+		self.comLink.send(finalString)
+
 
 
 
@@ -92,7 +147,13 @@ class Application(Frame):
 		self.startButton.configure(text="Start", command=self.startSending)
 
 		# Disconnect the comLink
-		self.comLink.disconnect()
+		#self.comLink.disconnect()
+		self.firstSend = True
+
+		# Unlocking options
+		self.flightChannels.config(state = NORMAL)
+		self.optionPortMenu.config(state = NORMAL)
+		self.optionThrustMenu.config(state = NORMAL)
 
 
 
@@ -121,7 +182,7 @@ class Application(Frame):
 
 
 
-
+	# Gets the data from the controller and into the Channel-data list
 	def updateChannelValues(self):
 
 		# Get values from controller (not the raw data but the calculated data)
@@ -131,12 +192,20 @@ class Application(Frame):
 		oldSend = self.sending
 		self.sending = self.controller.send
 
+		# Toggle sending
 		if oldSend != self.sending:
-			print "Sending" if self.sending else "Not Sending"
+			if self.sending:
+				print "Sending" 
 
-		# Put them in the array
-		for x in xrange(0, self.parameter['nrChannels']):
+			else:
+				print "Not Sending"
+
+		# Loop through channels
+		for x in xrange(0, self.nrActiveChannels):
 			self.parameter['channelData'][x] = controllerData[x]
+
+
+				
 			
 
 
@@ -144,19 +213,26 @@ class Application(Frame):
 	def sendData(self):
 
 		finalString = ""
-
+		
 		# Looping through all the channels
-		for x in xrange(0, self.parameter['nrChannels']):
+		for x in xrange(0, self.nrActiveChannels):
 
 			# Calculate the output using Value Handler
 			output = self.parameter['channelOutput'][x] = self.valueHandler.getOutput(self.parameter['channelData'][x], x)
+
+			if x == 2 and self.thrustOption == 3: 
+				output = self.parameter['channelOutput'][x] = -1
+			
 			
 			# Finalize the string
-			finalString = finalString + str(output) + ("," if self.parameter['nrChannels'] - 1 != x else "") 		# Value 
+			finalString = finalString + str(output) + ("," if self.nrActiveChannels - 1 != x else "") 		# Value 
+
+			
 
 		# Send the data 
 		if self.sending:
 			self.comLink.send(finalString)
+			self.firstSend = False if self.firstSend else self.firstSend
 
 
 
@@ -168,10 +244,6 @@ class Application(Frame):
 		# Original stick containers
 		originalLeftStickCoordinates = self.canvas.coords(self.leftStick)
 		originalRightStickCoordinates = self.canvas.coords(self.rightStick)
-
-		# Basic correction of the max/min from stick containers
-		minCorrection = 0 
-		maxCorrection = 0
 
 		# Main Loop
 		while True:
@@ -185,9 +257,6 @@ class Application(Frame):
 			newRightPosY = self.calPinsOffset(self.parameter['maxOutput'] + self.parameter['minOutput'] - self.parameter['channelOutput'][1], self.parameter['maxOutput'], self.parameter['minOutput'], originalRightStickCoordinates[1] + 15, originalRightStickCoordinates[3] - 15)
 
 			# Apply changes and move accoridngly
-			leftCorr = 30
-			rightCorr = 0
-
 			self.canvas.coords(self.leftKnob, (newLeftPosX - 15, newLeftPosY - 15, newLeftPosX + 15, newLeftPosY + 15))
 			self.canvas.coords(self.rightKnob, (newRightPosX - 15, newRightPosY - 15, newRightPosX + 15, newRightPosY + 15))
 
@@ -233,10 +302,13 @@ class Application(Frame):
 	# Exit procedure
 	def quitApp(self):
 
+
 		# Stop sending (if it was)
 		if self.sendingThreadActive:
 			self.stopSending()
 			time.sleep(0.05)
+
+		print "Program Terminating"
 
 		# GUI-stuff
 		self.destroy()  

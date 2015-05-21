@@ -108,8 +108,7 @@ class LeapMotion():
 		thrust = self.calcThrust(self.rawControllerData[2], self.controllerData[2])
 		self.controllerData = list(self.rawControllerData)
 		self.controllerData[2] = thrust
-		#print self.controllerData
-		
+	
 		return self.controllerData
 
 
@@ -119,7 +118,7 @@ class LeapMotion():
 		if self.thustControllerMode == 1:
 			#print self.mapThrust(newThrust, self.thrustIncreaseMax, self.thrustDecreaseMax, 1, -1)
 			return self.mapThrust(newThrust, self.thrustIncreaseMax, self.thrustDecreaseMax, 1, -1)
-		else:
+		elif self.thustControllerMode == 2:
 			if newThrust >= self.thrustNeuteralMax: 	# Increase Thrust
 
 				currentThrust = currentThrust + self.mapThrust(newThrust, self.thrustIncreaseMax, self.thrustIncreaseMin, self.thrustSpeed, 0)
@@ -129,7 +128,8 @@ class LeapMotion():
 
 				currentThrust = currentThrust + self.mapThrust(newThrust, self.thrustDecreaseMin, self.thrustDecreaseMax, 0, -self.thrustSpeed)
 				currentThrust = -1 if currentThrust < -1 else currentThrust
-
+				return currentThrust
+		else:
 			return currentThrust
 
 
