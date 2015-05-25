@@ -5,23 +5,29 @@ from Tkinter import *
 class Application(Frame):
 
 	def __init__(self, parent, controller, comLink, valueHandler, parameter):
-		Frame.__init__(self, parent) 		# Original constructor
 
+		# Original constructor
+		Frame.__init__(self, parent) 		
+
+		# Save parameters
 		self.parent = parent
 		self.controller = controller
 		self.comLink = comLink
 		self.valueHandler = valueHandler
 		self.parameter = parameter
 
-		self.setupUI()
+		# Run GUI-setup
+		self.setupGUI()
 
+		# Initial/Default loop values
 		self.sendingThreadActive = False
 		self.sending = False
 		self.firstSend = True
 
 
 
-	def setupUI(self):
+	# Sets up the UI in the GUI
+	def setupGUI(self):
 
 		self.parent.title("Leap2Arduino2Tx")
 		self.config(bg = '#F0F0F0')
@@ -31,22 +37,22 @@ class Application(Frame):
 		self.canvas = Canvas(self, relief = FLAT, background = "white", width = 800, height = 440)
 
 		# Stick Containers
-		self.leftStick = self.canvas.create_oval(130, 100, 330, 300, outline='gray80', fill='gray90', tags=('leftStick'))
-		self.rightStick = self.canvas.create_oval(470, 100, 670, 300, outline='gray80', fill='gray90', tags=('rightStick'))
+		self.leftStick = self.canvas.create_oval(120, 100, 320, 300, outline='gray80', fill='gray90', tags=('leftStick'))
+		self.rightStick = self.canvas.create_oval(480, 100, 680, 300, outline='gray80', fill='gray90', tags=('rightStick'))
 	
 		# Left Knob
-		self.leftKnob = self.canvas.create_oval(215, 185, 245, 215, outline='gray60', fill='gray70', tags=('leftKnob'))
+		self.leftKnob = self.canvas.create_oval(205, 185, 235, 215, outline='gray60', fill='gray70', tags=('leftKnob'))
 		self.originalLeftKnobCoordinates = self.canvas.coords(self.leftKnob)
 
 		# Right Knob
-		self.rightKnob = self.canvas.create_oval(555, 185, 585, 215, outline='gray60', fill='gray70', tags=('rightKnob'))
+		self.rightKnob = self.canvas.create_oval(565, 185, 595, 215, outline='gray60', fill='gray70', tags=('rightKnob'))
 		self.originalRightKnobCoordinates = self.canvas.coords(self.rightKnob)
 
 		#Text
 		self.leftStickText = self.canvas.create_text(230, 330, text="Thrust / Rudder", fill="gray50")
 		self.rightStickText = self.canvas.create_text(572, 330, text="Elevator / Aileron", fill="gray50")
-		#self.rightStick = self.canvas.create_oval(0, 20, 20, 40, outline='gray40', fill='gray60', tags=('ball3'))
-		#self.ball.pack(side = TOP) 
+
+		# Packs canvass
 		self.canvas.pack(side = TOP, anchor = NW, padx = 10, pady = 10)
 
 		# Start-button
@@ -63,12 +69,11 @@ class Application(Frame):
 		self.flightChannels.select()
 		self.flightChannels_window = self.canvas.create_window(315, 24, anchor=CENTER, window=self.flightChannels)
 
-
 		# COM-port option menu
 		comPorts = self.comLink.getPorts()
 		self.optionPortMenuVariable = StringVar(self.parent)
 		if len(comPorts) == 1:
-			self.optionPortMenuVariable.set(comPorts[0]) # initial value
+			self.optionPortMenuVariable.set(comPorts[0])
 		else:
 			self.optionPortMenuVariable.set(comPorts[len(comPorts)-1]) 
 		self.optionPortMenu = apply(OptionMenu, (self.parent, self.optionPortMenuVariable) + tuple(comPorts))
@@ -84,16 +89,28 @@ class Application(Frame):
 		self.thrust_window = self.canvas.create_window(100, 10, anchor=NW, window=self.optionThrustMenu)
 		self.thrust_window_text = self.canvas.create_text(15, 15, text="Thust mode: ", fill="black", anchor=NW)
 
+		# Expo/DR options
+		expos = []
+		dualrates = []
+		for x in xrange(0, 11):
+			expos.append(float(x)/10)
+			dualrates.append(float(x)/10)
 
-		#self.optionPortMenu.pack()
-		'''
-		nrActiveChannelsOption = range(1, self.parameter['nrChannels']+1)
-		self.optionActiveChannelMenuVariable = StringVar(self.parent)
-		self.optionActiveChannelMenuVariable.set(nrActiveChannelsOption[3])
-		self.optionActiveChannelMenu = apply(OptionMenu, (self.parent, self.optionActiveChannelMenuVariable) + tuple(nrActiveChannelsOption))
-		self.optionActiveChannelMenu.config(anchor=E)
-		self.optionActiveChannelMenu.pack()
-		'''
+		# Exponentials 
+		self.optionExponentialMenuVariable = StringVar(self.parent)
+		self.optionExponentialMenuVariable.set(expos[1])
+		self.optionExponentialMenu = apply(OptionMenu, (self.parent, self.optionExponentialMenuVariable) + tuple(expos))
+		self.exponentials_window = self.canvas.create_window(110, 405, anchor=NW, window=self.optionExponentialMenu)
+		self.exponentials_window_text = self.canvas.create_text(15, 412, text="Exponentials: ", fill="black", anchor=NW)
+
+		# Dual Rates
+		self.optionDualRatesMenuVariable = StringVar(self.parent)
+		self.optionDualRatesMenuVariable.set(dualrates[10])
+		self.optionDualRatesMenu = apply(OptionMenu, (self.parent, self.optionDualRatesMenuVariable) + tuple(dualrates))
+		self.dualrates_window = self.canvas.create_window(340, 405, anchor=NW, window=self.optionDualRatesMenu)
+		self.dualrates_window_text = self.canvas.create_text(260, 412, text="Dual rates: ", fill="black", anchor=NW)
+
+
 
 	# Function triggered when pressing the start-button
 	def startSending(self):
@@ -105,11 +122,28 @@ class Application(Frame):
 		self.flightChannels.config(state = DISABLED)
 		self.optionPortMenu.config(state = DISABLED)
 		self.optionThrustMenu.config(state = DISABLED)
+		self.optionDualRatesMenu.config(state = DISABLED)
+		self.optionExponentialMenu.config(state = DISABLED)
 		self.startButton.configure(text="Stop", command=self.stopSending)
 
 		# Saving options
 		self.nrActiveChannels = self.flightChannelsVariable.get()
-		self.thrustOption = int(self.optionThrustMenuVariable.get())	
+		self.thrustOption = int(self.optionThrustMenuVariable.get())
+
+		# Sets expos & dualrates
+		for x in xrange(0, self.parameter['nrActiveChannels']):
+			if x == 2:			# Thrust channel
+				self.parameter['dualRates'][x] = 1
+				self.parameter['exponentials'][x] = 0
+			else:				# Channel 1, 2, 4
+				self.parameter['dualRates'][x] = float(self.optionDualRatesMenuVariable.get())
+				self.parameter['exponentials'][x] = float(self.optionExponentialMenuVariable.get())
+
+		# Printing initial settings
+		if self.parameter['debug']: print "Exponentials: " + str(self.parameter['exponentials'])
+		if self.parameter['debug']: print "Dual Rates: " + str(self.parameter['dualRates'])
+		if self.parameter['debug']: print "Thrust mode: " + self.optionThrustMenuVariable.get()
+		if self.parameter['debug']: print "Number of channels used: " + str(self.flightChannelsVariable.get())
 
 		# Applying options
 		self.controller.thustControllerMode = self.thrustOption	
@@ -117,11 +151,12 @@ class Application(Frame):
 		# Start threads
 		self.sendDefaults()
 		self.sendingThreadActive = True
-		thread.start_new_thread(self.sendDataThread, (self.parameter['sendingDelay'],))		# Data sender/updater	
-		thread.start_new_thread(self.updateUIPins, (self.parameter['sendingDelay']+0.03,))			# UI updater
+		thread.start_new_thread(self.sendDataThread, (self.parameter['sendingDelay'],))				# Data sender/updater	
+		thread.start_new_thread(self.updateUIPins, (self.parameter['sendingDelay']+0.03,))			# UI updater (runs abit slower than the sending thread)
 
 
-	# Resets the values at first send!
+
+	# Resets the values at first send (pretty much the same as the send data thread)
 	def sendDefaults(self):
 
 		finalString = ""
@@ -143,24 +178,26 @@ class Application(Frame):
 	# Function triggered when pressing the stop-button
 	def stopSending(self):
 
+		# Ends thread
 		self.sendingThreadActive = False
-		self.startButton.configure(text="Start", command=self.startSending)
-
-		# Disconnect the comLink
-		#self.comLink.disconnect()
+		
+		# Resets parameters
 		self.firstSend = True
 
 		# Unlocking options
 		self.flightChannels.config(state = NORMAL)
 		self.optionPortMenu.config(state = NORMAL)
 		self.optionThrustMenu.config(state = NORMAL)
+		self.optionDualRatesMenu.config(state = NORMAL)
+		self.optionExponentialMenu.config(state = NORMAL)
+		self.startButton.configure(text="Start", command=self.startSending)
 
 
 
 	# Main data thread
 	def	sendDataThread(self, delay):
 
-		print "Started Tracking"
+		if self.parameter['debug']: print "Started Tracking"
 
 		# Main Loop
 		while True:
@@ -178,7 +215,7 @@ class Application(Frame):
 			if self.sendingThreadActive is not True:
 				break
 
-		print "Stopped Tracking"
+		if self.parameter['debug']: print "Stopped Tracking"
 
 
 
@@ -195,10 +232,10 @@ class Application(Frame):
 		# Toggle sending
 		if oldSend != self.sending:
 			if self.sending:
-				print "Sending" 
+				if self.parameter['debug']: print "Sending" 
 
 			else:
-				print "Not Sending"
+				if self.parameter['debug']: print "Not Sending"
 
 		# Loop through channels
 		for x in xrange(0, self.nrActiveChannels):
@@ -213,7 +250,7 @@ class Application(Frame):
 	def sendData(self):
 
 		finalString = ""
-		
+
 		# Looping through all the channels
 		for x in xrange(0, self.nrActiveChannels):
 
@@ -261,7 +298,7 @@ class Application(Frame):
 			self.canvas.coords(self.rightKnob, (newRightPosX - 15, newRightPosY - 15, newRightPosX + 15, newRightPosY + 15))
 
 			# Prints status
-			self.canvas.itemconfig(self.statusText, text=str(self.parameter['channelOutput']))
+			if self.parameter['debug']: self.canvas.itemconfig(self.statusText, text=str(self.parameter['channelOutput']))
 
 			# Changing colors on Pins
 			if self.sending:
@@ -302,13 +339,12 @@ class Application(Frame):
 	# Exit procedure
 	def quitApp(self):
 
-
 		# Stop sending (if it was)
 		if self.sendingThreadActive:
 			self.stopSending()
 			time.sleep(0.05)
 
-		print "Program Terminating"
+		if self.parameter['debug']: print "Program Terminating"
 
 		# GUI-stuff
 		self.destroy()  

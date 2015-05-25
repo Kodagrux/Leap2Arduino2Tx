@@ -102,8 +102,6 @@ class LeapMotion():
 
 
 	def updateControllerData(self):
-		#print "INNAN " + str(self.controllerData) 
-		#self.rawControllerData = self.listener.rawControllerData
 
 		thrust = self.calcThrust(self.rawControllerData[2], self.controllerData[2])
 		self.controllerData = list(self.rawControllerData)

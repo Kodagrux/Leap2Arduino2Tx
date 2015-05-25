@@ -7,65 +7,61 @@ import serial
 
 class Communication():
 	
-	def __init__(self):
+	# Constructor
+	def __init__(self, parameter):
+		self.parameter = parameter
 		self.speed = 9600
 		self.ready = False
 		self.port = '/dev/cu.usbmodemfa141'
 
 
 
+	# Function for connection to the Ardunio
 	def connect(self, port):
 		self.port = port
 		if not hasattr(self, 'ser'):
 			try:
 				self.ser = serial.Serial(self.port, self.speed)
-				#print str(self.ser)
 			except Exception as e:
-				print e.message
+				if self.parameter['debug']: print e.message
 			finally:
 				if hasattr(self, 'ser'):
 					if str(self.ser.isOpen()) == 'false':
-					    print 'Port now open'
+					    if self.parameter['debug']: print 'Port now open'
 					    self.ser.open()
 					else:
-					    print 'Port already open'
+					    if self.parameter['debug']: print 'Port already open'
 					self.ready = True
-			#else:
 		else:
-			print "Already connected?"
+			if self.parameter['debug']: print "Already connected?"
 
 
 
+	# A simpel send-function for the Arduino
 	def send(self, data):
-		print 'Sending message: ', data
+		if self.parameter['debug']: print 'Sending message: ', data
 		self.ser.write(data + '\n')
 
 
 
+	# Reads a line
 	def read(self):
 		return self.ser.readline()
 
 
 
+	# Disconnects the Arduino from the program
 	def disconnect(self):
 		if hasattr(self, 'ser'):
 			try:
 				self.ser.close();
 			except Exception as e:
-				print e.message
-
-			#self.ser = None
+				if self.parameter['debug']: print e.message
 
 
 
+	# Returns the ports available
 	def getPorts(self):
-		"""Lists serial ports
-
-		:raises EnvironmentError:
-		On unsupported or unknown platforms
-		:returns:
-		A list of available serial ports
-		"""
 		if sys.platform.startswith('win'):
 			ports = ['COM' + str(i + 1) for i in range(256)]
 

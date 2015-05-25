@@ -19,23 +19,25 @@ valueHandler = 0
 # Variables
 global parameter
 parameter = {
-	'maxOutput' : 937,
-	'minOutput' : 113, 
+	'debug' : 				True,
 
-	'maxInput' : 1,
-	'minInput' : -1,
+	'maxOutput' : 			937,
+	'minOutput' : 			113, 
 
-	'exponentials' : [0.1, 0.1, 0, 0.1, 0, 0, 0, 0],
-	'dualRates' : [0.8, 0.8, 1, 0.8, 1, 1, 1, 1],
-	'controllerTrim' : [0, -0.2, 0, 0, 0, 0, 0, 0],
+	'maxInput' :	 		1,
+	'minInput' : 			-1,
 
-	'defaultChannelData': [],
-	'channelData': [],
-	'channelOutput': [],
-	'nrChannels': 8,
-	'nrActiveChannels': 4,
+	'exponentials' : 		[0.1, 0.1, 0.0, 0.1, 0.0, 0.0, 0.0, 0.0],
+	'dualRates' : 			[0.8, 0.8, 1.0, 0.8, 1.0, 1.0, 1.0, 1.0],
+	'controllerTrim' : 		[0.0, -0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
 
-	'sendingDelay': 0.03
+	'defaultChannelData': 	[],
+	'channelData': 			[],
+	'channelOutput': 		[],
+	'nrChannels': 			8,
+	'nrActiveChannels': 	4,
+
+	'sendingDelay': 		0.03
 }
 
 #Aditional parameters
@@ -55,50 +57,58 @@ parameter['defaultChannelData'].append(parameter['minInput'])    	# Channel 10: 
 parameter['defaultChannelData'].append(parameter['minInput'])    	# Channel 11: Aux 5
 parameter['defaultChannelData'].append(parameter['minInput'])    	# Channel 12: Aux 6
 
+
+
+# Main
 def main():
-	#appGUI.mainloop()
-	#comLink.connect()
 
-
-	application.mainloop()
-	quit()
+	application.mainloop() 			# When the program runs
+	quit()							# When the program quits
 
 
 
+# First setup
 def initialSetup():
 	global parameter
-	global valueHandler
-	valueHandler = ValueHandler(parameter['maxOutput'], parameter['minOutput'], parameter['maxInput'], parameter['minInput'], parameter['nrChannels'])
-	valueHandler.setExponentials(parameter['exponentials'])
-	#valueHandler.setDualRates(parameter['dualRates'])
 
+	# ValueHandler init
+	global valueHandler
+	valueHandler = ValueHandler(parameter)
+
+	# Sets the correct default channel values
 	for x in xrange(0, parameter['nrChannels']):
 		parameter['channelData'].append(parameter['defaultChannelData'][x]) 							# Reset the starting values
 		parameter['channelOutput'].append(valueHandler.getOutput(parameter['channelData'][x], x)) 		# Calculating the correct output
 
+	# ComLink init
 	global comLink
-	comLink = Communication()
+	comLink = Communication(parameter)
 
+	# Controller init
 	global controller
 	controller = LeapMotion(parameter['channelData'], parameter['nrChannels'], parameter['controllerTrim'])
 
+	# Main app setup
 	global appGUI
 	appGUI = Tk()
 	appGUI.geometry('800x468+100+100')
+	appGUI.resizable(0,0)
 
+	# Main app init
 	global application
 	application = Application(appGUI, controller, comLink, valueHandler, parameter)
 
 
 
 
-
+# When the program quits
 def quit():
 	comLink.disconnect()
 	controller.exit()
 
 
 
+# Start
 if __name__ == "__main__":
 	initialSetup()
 	main()
