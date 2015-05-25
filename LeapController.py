@@ -5,8 +5,10 @@ from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 from Communication import Communication
 
 
+# Class supplied by the Leap Motion for listning for the controller
 class LeapListener(Leap.Listener):
 
+	# First time setup
 	def setup(self, parent):
 		self.parent = parent
 		self.rawControllerData = self.parent.rawControllerData #[0,0,0,0,0,0,0,0]
@@ -14,6 +16,7 @@ class LeapListener(Leap.Listener):
 		self.lastFrameRightHandOpen = True
 
 
+	# On every frame
 	def on_frame(self, controller):
 
 		frame = controller.frame()
@@ -64,13 +67,9 @@ class LeapListener(Leap.Listener):
 
 		self.lastFrame = frame
 
-		#print self.parent.send
-
-		#print str(self.rawControllerData)
 
 
-
-
+# Main interaction class
 class LeapMotion():
 	
 	def __init__(self, defaultChannelData, nrChannels, trim):
@@ -101,6 +100,7 @@ class LeapMotion():
 
 
 
+	# Fetches the values form the Leap
 	def updateControllerData(self):
 
 		thrust = self.calcThrust(self.rawControllerData[2], self.controllerData[2])
@@ -111,10 +111,11 @@ class LeapMotion():
 
 
 
+	# Calculates the thrust 
 	def calcThrust(self, newThrust, currentThrust):
 
 		if self.thustControllerMode == 1:
-			#print self.mapThrust(newThrust, self.thrustIncreaseMax, self.thrustDecreaseMax, 1, -1)
+			
 			return self.mapThrust(newThrust, self.thrustIncreaseMax, self.thrustDecreaseMax, 1, -1)
 		elif self.thustControllerMode == 2:
 			if newThrust >= self.thrustNeuteralMax: 	# Increase Thrust
@@ -131,12 +132,12 @@ class LeapMotion():
 			return currentThrust
 
 
-
+	# WIP Recalibrating for hand
 	def recalebrate(self):
 		print "position hand "
 
 
-
+	# Maps the thrust values from height in mm(?) to -1 to 1
 	def mapThrust(self, thrust, maxInput, minInput, maxOutput, minOutput):
 
 		thrust = maxInput if thrust > maxInput else thrust
@@ -150,7 +151,7 @@ class LeapMotion():
 		return minOutput + (scaledThrust * outputSpan)
 
 
-
+	# When program shuts down
 	def exit(self):
 		self.controller.remove_listener(self.listener)
 

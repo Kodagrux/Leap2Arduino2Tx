@@ -45,7 +45,13 @@ Before you do this part, go through the [Hardware-section](#hardware) if you hav
 
 
 ### Configuration
-At the moment there isn't that much too configure, but you should select the correct COM-port (USB-port) where the Arduino is connected.
+At the moment there isn't that much to configure but the things you can tweak are:
+
+1. Choose the way you control the thrust (see [controls](#controls) for more info).
+2. Choose to only send 4 channels (1, 2, 3, 4) to the Arduino. This will speed up the connection and give you less lag when flying.
+3. Choose the correct COM-port (USB-port) where the Arduino is connected.
+4. Change exponentials (default is 0.1, just a little bit) for channel 1, 2 and 4.
+5. Change dual rates (default is 1, off) for channel 1, 2 and 4.
 
 
 ### Controls
@@ -56,7 +62,10 @@ When you press the "Start"-button the application starts sending the default com
 * **Yaw**: If you yaw your hand, your vehicle will yaw 
 * **Pitch**: If you pitch your hand, your vehicle will pitch
 * **Roll**: If you roll your hand, your vehicle will roll
-* **Thrust**: You have a "neutral zone" about 20 to 30 centemeters above the Leap where the thrust won't be changed. Raising your hand will increase the thrust exponentionally (the further you get from the neutral zone the faster you increase your thurst). The decreasing your thrust works the same way, the closer you get to the Leap with your hand the faster your throttle is decreased
+* **Thrust**: There are currently 3 different ways you can controll thrust, the modes are:
+	1. Your hand is tracked and encoded 1:1. This means that if you have your hand high up, away from the Leap Motion, you will give the most throttle and vise versa. Keep in mind that your hand needs to be in the Leaps field of view.
+	2. You have a "neutral zone" about 20 to 30 centemeters above the Leap where the thrust won't be changed. Raising your hand will increase the thrust exponentionally (the further you get from the neutral zone the faster you increase your thurst). The decreasing your thrust works the same way, the closer you get to the Leap with your hand the faster your throttle is decreased
+	3. You use an external [potentiometer](http://en.wikipedia.org/wiki/Potentiometer) (0 - 1023) that is plugged in to the Arduino to control the thurst.
 
 Have a look in the "Leap Visualizer"-folder for a basic web-demo of the controls. (Trust doesn't work as it does in the app, instead you control that with the height of your left hand).
 

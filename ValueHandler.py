@@ -2,17 +2,19 @@ import math
 
 class ValueHandler():
 
+	# Init
 	def __init__(self, parameter):
 		self.parameter = parameter
 
 
-
+	# Main function for getting the correct values
 	def getOutput(self, channelValue, channel):
 		
 		return int(round(self.mapValue(self.calcDualRate(self.calcExponential(self.calcEndpoints(channelValue), channel), channel))))
 
 
 
+	# Maps a value from one scale to another
 	def mapValue(self, value):
 
 		value = self.parameter['maxInput'] if value > self.parameter['maxInput'] else value
@@ -27,6 +29,7 @@ class ValueHandler():
 
 
 
+	# Calculating the exponential values
 	def calcExponential(self, value, channel): 				# Rangeing from 0 to 1
 
 		if self.parameter['exponentials'][channel] != 0:
@@ -40,6 +43,7 @@ class ValueHandler():
 
 
 
+	# Calculates the channel value after dual rates
 	def calcDualRate(self, value, channel):
 
 		if self.parameter['dualRates'][channel] < 1 and self.parameter['dualRates'][channel] > 0:
@@ -49,6 +53,7 @@ class ValueHandler():
 
 
 
+	# Checks max/min values
 	def calcEndpoints(self, value):
 
 		value = self.parameter['maxInput'] if value > self.parameter['maxInput'] else value
