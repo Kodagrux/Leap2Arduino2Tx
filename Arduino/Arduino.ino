@@ -67,7 +67,9 @@ void loop() {
   
   if (thurstControl) {
     chData[2] = map(analogRead(THRUST_PIN), 0, 1023, 113, 937);
-  }
+  } /*else {
+    
+  }*/
 }
 
 

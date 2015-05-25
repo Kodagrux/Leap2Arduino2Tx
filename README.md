@@ -1,5 +1,3 @@
-### This program is still in development and has not been tested yet (should be done by the end of May); this text will be removed when it has - 24/04/15
-
 ## Leap2Arduino2Tx
 **Leap2Artudino2Tx** is makes it possible to send commands (yaw, pitch, roll, throttle) from the [Leap Motion](https://www.leapmotion.com/), via a Python-program, via an Arduino, to a R/C Transmitter. 
 
@@ -63,9 +61,9 @@ When you press the "Start"-button the application starts sending the default com
 * **Pitch**: If you pitch your hand, your vehicle will pitch
 * **Roll**: If you roll your hand, your vehicle will roll
 * **Thrust**: There are currently 3 different ways you can controll thrust, the modes are:
-	1. Your hand is tracked and encoded 1:1. This means that if you have your hand high up, away from the Leap Motion, you will give the most throttle and vise versa. Keep in mind that your hand needs to be in the Leaps field of view.
-	2. You have a "neutral zone" about 20 to 30 centemeters above the Leap where the thrust won't be changed. Raising your hand will increase the thrust exponentionally (the further you get from the neutral zone the faster you increase your thurst). The decreasing your thrust works the same way, the closer you get to the Leap with your hand the faster your throttle is decreased
-	3. You use an external [potentiometer](http://en.wikipedia.org/wiki/Potentiometer) (0 - 1023) that is plugged in to the Arduino to control the thurst.
+	1. **Mode 1**: Your hand is tracked and encoded 1:1. This means that if you have your hand high up, away from the Leap Motion, you will give the most throttle and vise versa. Keep in mind that your hand needs to be in the Leaps field of view.
+	2. **Mode 2**: You have a "neutral zone" about 20 to 30 centemeters above the Leap where the thrust won't be changed. Raising your hand will increase the thrust exponentionally (the further you get from the neutral zone the faster you increase your thurst). The decreasing your thrust works the same way, the closer you get to the Leap with your hand the faster your throttle is decreased
+	3. **Mode 3**: You use an external [potentiometer](http://en.wikipedia.org/wiki/Potentiometer) (0 - 1023) that is plugged in to the Arduino to control the thurst.
 
 Have a look in the "Leap Visualizer"-folder for a basic web-demo of the controls. (Trust doesn't work as it does in the app, instead you control that with the height of your left hand).
 
@@ -87,7 +85,7 @@ The following are features I would like to incorporate into the application in t
 
 ### Known Issues
 * The UI sometimes freezes (but the commands are still beeing sent)
-* The program only sends channel-updates every 0.05 seconds (due to limitations in the Arduino hardware), this isn't really a problem since it's fast enough, but users should be aware
+* The program only sends channel-updates every 0.05 seconds (at best; due to limitations in the Arduino hardware), this isn't really a problem since it's fast enough, but users should be aware
 
 
 ### Inspirations
