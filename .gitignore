@@ -6,3 +6,9 @@ Leap2Arduino2Tx.sublime-project
 Leap2Arduino2Tx.sublime-workspace
 
 old/*
+
+*.key
+
+.gitignore
+
+PromoPicture.jpg

@@ -122,9 +122,11 @@ void startUp() {
   digitalWrite(STATUS_PIN, LOW);
   delay(100);
   digitalWrite(TX_PIN, LOW);
-  
+  delay(300);
   
   if (analogRead(THRUST_PIN) > 2) {
     digitalWrite(ERROR_PIN, HIGH);
+  } else {
+    digitalWrite(STATUS_PIN, HIGH); 
   }
 }

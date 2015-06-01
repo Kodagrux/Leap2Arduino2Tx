@@ -100,7 +100,6 @@ def initialSetup():
 
 
 
-
 # When the program quits
 def quit():
 	comLink.disconnect()

@@ -1,6 +1,7 @@
 ## Leap2Arduino2Tx
 **Leap2Artudino2Tx** is makes it possible to send commands (yaw, pitch, roll, throttle) from the [Leap Motion](https://www.leapmotion.com/), via a Python-program, via an Arduino, to a R/C Transmitter. 
 
+![](http://arvidbrane.se/wp-content/uploads/2015/06/Leap2Arduino2Tx-2000x1484.jpg)
 
 ### Introduction
 Have you ever stuck your hand out the window of your car and imagined your hand was an airplane flying thorugh the wind? No? Well, *I have*. Ever since I got into the R/C hobby a couple of years ago I've struggled with the R/C-controllers that where out there; they aren't really that user friendly and intuitive to use; you really have no idea of how you are supposed to use this controller the first time you pick it up. I set out to change this by allowing the user to control their R/C vehicle (Multirotors, Airplanes, Helicopters, etc.) using only the movement and motion of your hand (see the [Controls-section](#controls)). 

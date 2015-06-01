@@ -300,7 +300,7 @@ class Application(Frame):
 			# Prints status
 			if self.parameter['debug']: self.canvas.itemconfig(self.statusText, text=str(self.parameter['channelOutput']))
 
-			# Changing colors on Pins
+			# Changing colors on Pins 
 			if self.sending:
 
 				# Red
