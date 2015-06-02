@@ -26,6 +26,9 @@ Eventhough this process worked for me, without destroying my gear, doesn't mean 
 ### Installation
 Here are the following steps for setting up and getting started. *Before* getting started you sould read the [disclaimer](#disclaimer) and [requirements](#requirements) (if you haven't already).
 
+Below is a short video explaining how to hook everything up:
+[![The Setup Video](http://img.youtube.com/vi/faQnHgn8Z-0/0.jpg)](http://www.youtube.com/watch?v=faQnHgn8Z-0)
+
 
 #### Hardware
 1. Set your transmitter to training-mode, [how-to is shown here](https://www.youtube.com/watch?v=G_YuBu1E8iI), and connect the 3,5 mm cable in the back of it
@@ -56,14 +59,17 @@ At the moment there isn't that much to configure but the things you can tweak ar
 ### Controls
 The controls are designed to be as natural and intuative as possible, that beeing said I should mention that this concept is originally designed for quadrocopters **but** should feel very natural for both airplanes and helicopters (I doubt controlling cars makes as much sense; this might change, see the [Future-section](#future)). *Before* flying you sould read the [disclaimer](#disclaimer), if you haven't already.
 
-When you press the "Start"-button the application starts sending the default commands to the transmitter. In order for the program to start sending *your hand gestures* you need to [clench your right fist](http://static.ddmcdn.com/gif/blogs/6a00d8341bf67c53ef0134885141e4970c-500wi.jpg) (to stop tracking, do the same). While tracking you should keep your [hand open](http://www.corbisimages.com/images/Corbis-42-23884189.jpg?size=67&uid=629fc857-b72f-488b-9eec-382be22cbfbf), keep in mind that the app att the moment only tracks your right hand.
+Below is a short video explaining how the controls work:
+[![The Controls Video](http://img.youtube.com/vi/iUCDGIBrwPQ/0.jpg)](http://www.youtube.com/watch?v=iUCDGIBrwPQ)
+
+When you press the "Start"-button the application starts sending the default commands to the transmitter to reset it. In order for the program to start tracking and registering *your hand gestures* you need to [clench your right fist](http://static.ddmcdn.com/gif/blogs/6a00d8341bf67c53ef0134885141e4970c-500wi.jpg) (to stop tracking, do the same). While tracking you should keep your [hand open](http://www.corbisimages.com/images/Corbis-42-23884189.jpg?size=67&uid=629fc857-b72f-488b-9eec-382be22cbfbf), keep in mind that the app at the moment only tracks your right hand (sorry lefties). As soon as you pinch your index finger and thumb together you arm the program (do the same to disarm), meaning the commands are beening sent to the Arduino and therefore your transmitter.
 
 * **Yaw**: If you yaw your hand, your vehicle will yaw 
 * **Pitch**: If you pitch your hand, your vehicle will pitch
 * **Roll**: If you roll your hand, your vehicle will roll
 * **Thrust**: There are currently 3 different ways you can controll thrust, the modes are:
 	1. **Mode 1**: Your hand is tracked and encoded 1:1. This means that if you have your hand high up, away from the Leap Motion, you will give the most throttle and vise versa. Keep in mind that your hand needs to be in the Leaps field of view.
-	2. **Mode 2**: You have a "neutral zone" about 20 to 30 centemeters above the Leap where the thrust won't be changed. Raising your hand will increase the thrust exponentionally (the further you get from the neutral zone the faster you increase your thurst). The decreasing your thrust works the same way, the closer you get to the Leap with your hand the faster your throttle is decreased
+	2. **Mode 2**: You have a "neutral zone" about 20 to 30 centemeters above the Leap where the thrust won't be changed. Raising your hand will increase the thrust exponentionally (the further you get from the neutral zone the faster you increase your thurst). The decreasing your thrust works the same way, the closer you get to the Leap with your hand the faster your throttle is decreased.
 	3. **Mode 3**: You use an external [potentiometer](http://en.wikipedia.org/wiki/Potentiometer) (0 - 1023) that is plugged in to the Arduino to control the thurst.
 
 Have a look in the "Leap Visualizer"-folder for a basic web-demo of the controls. (Trust doesn't work as it does in the app, instead you control that with the height of your left hand).
